@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaction Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+    function profile(){
+      const name = sessionStorage.getItem("name");
+      const id = sessionStorage.getItem("id");
+     
+      if (!id || !name) {
+        window.location.href = "login.html";
+      }
+
+      // Show name
+      document.getElementById("text").textContent = `Welcome, ${name}!`;
+
+      // Fetch opening balance
+      axios.get(`https://codingshika.com/APP/EXP/opbal_list.php?uid=${id}`)
+        .then(res => {
+          const balance = res.data.posts.post[0].OPBAL;
+          sessionStorage.setItem("balance", res.data.posts.post[0].OPBAL);
+          document.getElementById("b1").textContent = `Opening Balance: ₹${balance}`;
+        })
+    }
+
+    function formatDate(dateInput) {
+      const date = new Date(dateInput);
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yy = String(date.getFullYear()).slice(-2);
+      return `${dd}-${mm}-${yy}`;
+    }
+
+    function addCredit() {
+      const UID = sessionStorage.getItem("id");
+      const balance = sessionStorage.getItem("balance"); 
+      let date = formatDate(document.getElementById("cDate").value);
+      let note = document.getElementById("cNote").value;
+      let creditAmount = document.getElementById("cAmount").value;
+      let debit=0;
+      sessionStorage.setItem("credit",creditAmount);
+
+      if (!creditAmount || creditAmount <= 0) {
+        alert("Please enter a valid credit amount");
+        return;
+      }
+
+      axios.post("https://codingshika.com/APP/EXP/insert_credit.php?uid="+UID+"&date="+date+"&note="+note+"&debit="+debit+"&credit="+creditAmount
+        ).then(res => {
+        console.log(res.data);
+        if(res.data.posts.status == 200) {
+          alert("Credit added successfully");
+          // Clear form fields
+          document.getElementById("cDate").value = "";
+          document.getElementById("cNote").value = "";
+          document.getElementById("cAmount").value = "";
+          
+          // Close modal
+          var modal = bootstrap.Modal.getInstance(document.getElementById('creditModal'));
+          modal.hide();
+        } else {
+          alert("Failed to add credit");
+        }
+      }).catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred");
+      });
+    }
+
+    function addDebit() {
+      const UID = sessionStorage.getItem("id");
+      const balance = sessionStorage.getItem("balance");
+      let date = formatDate(document.getElementById("dDate").value);
+      let note = document.getElementById("dNote").value;
+      let debitAmount = document.getElementById("dAmount").value;
+      let credit=0;
+
+      if (!debitAmount || debitAmount <= 0) {
+        alert("Please enter a valid debit amount");
+        return;
+      }
+
+      axios.post("https://codingshika.com/APP/EXP/insert_debit.php?uid="+UID+"&date="+date+"&note="+note+"&debit="+debitAmount+"&credit="+credit
+       ).then(res => {
+        console.log(res.data);
+        if(res.data.posts.status == 200) {
+          alert("Debit added successfully");
+          // Clear form fields
+          document.getElementById("dDate").value = "";
+          document.getElementById("dNote").value = "";
+          document.getElementById("dAmount").value = "";
+          // Close modal
+          var modal = bootstrap.Modal.getInstance(document.getElementById('debitModal'));
+          modal.hide();
+        } else {
+          alert("Failed to add debit");
+        }
+      }).catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred");
+      });
+   }
+     function tCredit()
+     { const uid = sessionStorage.getItem("id");
+       axios.get(`https://codingshika.com/APP/EXP/transaction_list.php?uid=${uid}`)
+       .then(res=>{
+        const transactions = res.data.posts.post;
+        let totalCredit = 0;
+        for (let i = 0; i < transactions.length; i++) {
+        let credit = parseFloat(transactions[i].CREDIT || 0);
+         totalCredit += credit;}
+        alert("Total Debit = "+totalCredit);
+       })
+     }
+
+     function tDebit(){
+      const uid = sessionStorage.getItem("id");
+       axios.get(`https://codingshika.com/APP/EXP/transaction_list.php?uid=${uid}`)
+       .then(res=>{
+        const transactions = res.data.posts.post;
+        let totalDebit = 0;
+        for (let i = 0; i < transactions.length; i++) {
+        let debit = parseFloat(transactions[i].DEBIT || 0);
+         totalDebit += debit;}
+        alert("Total Debit = "+totalDebit);
+       })
+     }
+
+    function trans() {
+      window.location.href = "transaction.html";
+    }
+
+    function goback() {
+      sessionStorage.clear();
+      alert("You successfully logged out");
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .header {
+      background-color: #343a40;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .modal input {
+      margin-bottom: 12px;
+    }
+    .action-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+  </style>
+</head>
+
+<body onload="profile()">
+  <!-- Header -->
+  <div class="header">
+    <h2>Transaction Dashboard</h2>
+    <p>Manage Credit & Debit Entries Easily</p>
+    <h2 id="text">Welcome ,</h2>
+    <h2 id="b1">Opening Balance :</h2>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="container btn-container mb-5">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#creditModal">
+      ➕ Add Credit
+    </button>
+
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#debitModal">
+      ➖ Add Debit
+    </button>
+  </div>
+
+  <!-- Credit Modal -->
+  <div class="modal fade" id="creditModal" tabindex="-1" aria-labelledby="creditModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-success">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="creditModalLabel">Add Credit Transaction</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="date" class="form-control" id="cDate" required />
+          <input type="text" class="form-control" id="cNote" placeholder="Note" required />
+          <input type="number" class="form-control" id="cAmount" placeholder="Credit Amount" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" onclick="addCredit()">Add Credit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debit Modal -->
+  <div class="modal fade" id="debitModal" tabindex="-1" aria-labelledby="debitModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-danger">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="debitModalLabel">Add Debit Transaction</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="date" class="form-control" id="dDate" required />
+          <input type="text" class="form-control" id="dNote" placeholder="Note" required />
+          <input type="number" class="form-control" id="dAmount" placeholder="Debit Amount" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-danger" onclick="addDebit()">Add Debit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn btn-primary" onclick="trans()">View Transactions</button>
+    <button class="btn btn-dark" onclick="goback()">Logout</button>
+    <button class="btn btn-success" onclick="tCredit()">Total Credit</button>
+    <button class="btn btn-danger" onclick="tDebit()">Total Debit</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
