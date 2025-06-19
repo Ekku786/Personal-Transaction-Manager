@@ -1,0 +1,43 @@
+✅ Project Title:
+Personal Transaction Manager with API Integration (Axios)
+
+📝 Project Description:
+The Personal Transaction Manager is a web-based dashboard that helps users manage their personal finances by recording credit and debit transactions. The system interacts with backend APIs using Axios to perform all key operations such as user login, balance fetch, transaction entry, and listing.
+
+Built with HTML, JavaScript, Bootstrap, and Axios, the application supports:
+
+✅ User authentication (login/signup)
+
+✅ Real-time transaction listing (fetched using API)
+
+✅ Adding Credit and Debit entries
+
+✅ Displaying opening balance
+
+✅ Calculating total credit, total debit, and final balance
+
+✅ Session-based data handling (using sessionStorage)
+
+All API communications are handled with Axios GET and POST requests, ensuring efficient and responsive interactions between the front end and backend server.
+
+🛠️ Tech Stack:
+Frontend: HTML5, CSS3, JavaScript, Bootstrap
+
+API Communication: Axios (for HTTP GET/POST requests)
+
+Session Management: JavaScript sessionStorage
+
+📌 Key Features:
+🔐 Login and session tracking using user ID
+
+💰 Fetch and display opening balance on dashboard
+
+📤 Add new credit or debit entries via modals
+
+📊 Display list of all transactions dynamically
+
+➕ Calculate total credit, total debit, and final available balance
+
+🔄 Real-time updates after each transaction
+
+🚪 Logout with session clear and redirection
